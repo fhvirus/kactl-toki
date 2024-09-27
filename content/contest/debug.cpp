@@ -6,7 +6,7 @@
  * Description: Debug tool.
  */
 #pragma once
-#ifdef NONTOI
+#ifdef TOKI
 #define debug(args...) LKJ("\033[1;32m["#args"]\033[0m", args)
 template<class I> void LKJ(I&&x){ cerr << x << endl; }
 template<class I, class...T> void LKJ(I&&x, T&&...t)

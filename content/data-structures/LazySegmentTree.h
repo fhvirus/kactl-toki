@@ -29,7 +29,7 @@ struct Tag {
 int bc(int u) { return u <= 1 ? 1 : (2 << __lg(u-1)); }
 template <class V, class T> struct SGT {
   int n; vector<V> val; vector<T> tag;
-  SGT(int n): n(bc(n)), val(n*2), tag(n*2) {}
+  SGT(int _n): n(bc(_n)), val(n*2), tag(n*2) {}
   SGT(const vector<V>& v): n(bc(sz(v))), val(n*2), tag(n*2) {
     rep (i, 0, sz(v)) val[i+n] = v[i];
     for (int i = n; --i; ) val[i] = val[i*2] + val[i*2+1];
