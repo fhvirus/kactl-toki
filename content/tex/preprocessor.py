@@ -100,6 +100,29 @@ def processwithcomments(caption, instream, outstream, listingslang):
             includelist.append(include)
             continue
         nlines.append(line)
+    # Range hashes
+    hsh_begins = []
+    for lineno, line in enumerate(nlines):
+        if '// begin-hash' in line:
+            hsh_begins.append(lineno)
+        if '// end-hash' in line:
+            try:
+                begin = hsh_begins.pop()
+            except:
+                error = f"end-hash on line {lineno} does not match any begin-hash"
+                lines = []
+            to_hash = '\n'.join(nlines[begin: lineno + 1])
+            hash_script = 'hash'
+            p = subprocess.Popen(['sh', 'content/contest/%s.sh' % hash_script], stdin=subprocess.PIPE, stdout=subprocess.PIPE, encoding="utf-8")
+            hsh, _ = p.communicate(to_hash)
+            hsh = 'h: ' + hsh.split(None, 1)[0]
+            nlines[begin] = nlines[begin].replace('begin-hash', hsh)
+            nlines[lineno] = nlines[lineno].replace('end-hash', hsh)
+    try:
+        assert len(hsh_begins) == 0
+    except:
+        error = f"begin-hash on line(s) {hsh_begins} does not match any end-hash"
+        lines = []
     # Remove and process multiline comments
     source = '\n'.join(nlines)
     nsource = ''
@@ -184,8 +207,16 @@ def processwithcomments(caption, instream, outstream, listingslang):
 def processraw(caption, instream, outstream, listingslang = 'raw'):
     try:
         source = instream.read().strip()
+        if listingslang in ['C++', 'Java']:
+            hash_script = 'hash'
+            p = subprocess.Popen(['sh', 'content/contest/%s.sh' % hash_script], stdin=subprocess.PIPE, stdout=subprocess.PIPE, encoding="utf-8")
+            hsh, _ = p.communicate(source)
+            hsh = hsh.split(None, 1)[0]
+            hsh = hsh + ', '
+        else:
+            hsh = ''
         addref(caption, outstream)
-        print(r"\rightcaption{%d lines}" % len(source.split("\n")), file=outstream)
+        print(r"\rightcaption{%s%d lines}" % (hsh, len(source.split("\n"))), file=outstream)
         print(r"\begin{lstlisting}[language=%s,caption={%s}]" % (listingslang, pathescape(caption)), file=outstream)
         print(source, file=outstream)
         print(r"\end{lstlisting}", file=outstream)
