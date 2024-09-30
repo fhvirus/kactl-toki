@@ -42,9 +42,10 @@ int exampleFunction1(vi mice, int* cats, int catsCount) {
 	return sum;
 }
 
-int exampleFunction2() {
+/// Get range hashes like this!
+int exampleFunction2() { // begin-hash
 	return rand();
-}
+} // end-hash
 
 int exampleFunction3(int a, int b, int c) {
 	return exampleFunction2() * a * b * c;
