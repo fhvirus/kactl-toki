@@ -196,3 +196,5 @@ struct Poly : vl {
     return x.Mul(y).isz(m).imul(fac);
   } // end-hash
 };
+using Poly_t = Poly<998244353, 62>;
+template<> decltype(Poly_t::ntt) Poly_t::ntt = {};

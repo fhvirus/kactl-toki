@@ -27,7 +27,7 @@ struct LinearSolver {
       rep (r, i, n) rep(c, i, m)
         if ((v = fabs(A[r][c])) > bv) // mod: v != 0
           br = r, bc = c, bv = v;
-      if (bv <= eps) { // mod: bv == 0 / fabs(b[j]) != 0
+      if (bv <= eps) { // mod: bv == 0 / b[j] != 0
         rep (j, i, n) if (fabs(b[j]) > eps) {
           rank = -1; return; }
         break;
