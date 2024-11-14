@@ -2,8 +2,10 @@
 
 #include "../../content/geometry/MinimumEnclosingCircle.h"
 
+
 int main() {
 	srand(2);
+  typedef Point<double> P;
 	rep(it,0,1000000) {
 		int N = rand() % 20 + 1;
 		// int N = 4;
@@ -12,9 +14,20 @@ int main() {
 			ps.emplace_back(rand() % 21 - 10, rand() % 21 - 10);
 		}
 
-		pair<P, double> pa = mec(ps);
-		P mid = pa.first;
-		double rad = pa.second;
+		vector<P> circ = mec(ps);
+		P mid;
+		double rad;
+    if (sz(circ) == 1) {
+      mid = circ[0];
+      rad = 0;
+    } else if (sz(circ) == 2) {
+      mid = (circ[0] + circ[1]) / 2;
+      rad = (circ[0] - circ[1]).dist() / 2;
+    } else {
+      mid = ccCenter(circ[0], circ[1], circ[2]);
+      rad = ccRadius(circ[0], circ[1], circ[2]);
+    }
+
 		double maxDist = 0;
 		for(auto &p: ps) {
 			maxDist = max(maxDist, (p - mid).dist());

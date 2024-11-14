@@ -1,30 +1,35 @@
 /**
- * Author: Andrew He, chilli
- * Date: 2019-05-07
+ * Author: FHVirus
+ * Date: 2024-11-14
  * License: CC0
  * Source: folklore
  * Description: Computes the minimum circle that encloses a set of points.
  * Time: expected O(n)
- * Status: stress-tested
+ * Status: stress-tested & tested @ luogu P1742
  */
 #pragma once
 
 #include "Circumcircle.h"
 
-pair<P, double> mec(vector<P> ps) {
+template <class P>
+vector<P> mec(vector<P> ps) {
+  sort(all(ps)); ps.erase(unique(all(ps)), end(ps));
 	shuffle(all(ps), mt19937(time(0)));
-	P o = ps[0];
-	double r = 0, EPS = 1 + 1e-8;
-	rep(i,0,sz(ps)) if ((o - ps[i]).dist() > r * EPS) {
-		o = ps[i], r = 0;
-		rep(j,0,i) if ((o - ps[j]).dist() > r * EPS) {
-			o = (ps[i] + ps[j]) / 2;
-			r = (o - ps[i]).dist();
-			rep(k,0,j) if ((o - ps[k]).dist() > r * EPS) {
-				o = ccCenter(ps[i], ps[j], ps[k]);
-				r = (o - ps[i]).dist();
-			}
+  vector<P> circ(1, ps[0]);
+  const auto out = [&](P p) {
+    if (sz(circ) == 1) return not (p == circ[0]);
+    if (sz(circ) == 2)
+      return sgn((p * 2 - (circ[0] + circ[1])).dist2()
+        - (circ[0] - circ[1]).dist2()) > 0;
+    return inCircumcircle(p, circ[0], circ[1], circ[2]) < 0;
+  };
+	rep(i,0,sz(ps)) if (out(ps[i])) {
+    circ = {ps[i]};
+		rep(j,0,i) if (out(ps[j])) {
+      circ = {ps[i], ps[j]};
+			rep(k,0,j) if (out(ps[k]))
+        circ = {ps[i], ps[j], ps[k]};
 		}
 	}
-	return {o, r};
+	return circ;
 }
