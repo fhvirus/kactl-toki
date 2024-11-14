@@ -1,9 +1,9 @@
 \chapter{Number theory}
 
 \section{Modular arithmetic}
-	\kactlimport{ModularArithmetic.h}
+	% \kactlimport{ModularArithmetic.h}
 	% \kactlimport{ModInverse.h}
-	\kactlimport{ModPow.h}
+	% \kactlimport{ModPow.h}
 	\kactlimport{ModLog.h}
 	\kactlimport{ModSum.h}
 	\kactlimport{ModMulLL.h}
@@ -45,8 +45,15 @@
 
 \section{Estimates}
 	$\sum_{d|n} d = O(n \log \log n)$.
-
-	The number of divisors of $n$ is at most around 100 for $n < 5e4$, 500 for $n < 1e7$, 2000 for $n < 1e10$, 200\,000 for $n < 1e19$.
+  % Ref: https://gist.github.com/dario2994/fb4713f252ca86c1254d
+	Highly composite numbers:
+  {\centering
+    \begin{tabular}{c|c@{\ }c@{\ }c@{\ }c@{\ }c@{\ }c@{\ }c}
+      $n$         & 840 & 7560 & 83160 & 720720 & 8648640 & 735134400 & 963761198400 \\ \hline
+      $\sigma(n)$ & 32  & 64   & 128   & 240    & 448     & 1344      & 6720         \\
+    \end{tabular}
+  }
+  \( (866421317361600,26880), (897612484786617600, 103680) \)
 
 \section{Mobius Function}
 \[

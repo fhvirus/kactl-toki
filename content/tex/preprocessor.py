@@ -103,9 +103,9 @@ def processwithcomments(caption, instream, outstream, listingslang):
     # Range hashes
     hsh_begins = []
     for lineno, line in enumerate(nlines):
-        if '// begin-hash' in line:
+        if 'begin-hash' in line:
             hsh_begins.append(lineno)
-        if '// end-hash' in line:
+        if 'end-hash' in line:
             try:
                 begin = hsh_begins.pop()
             except:
