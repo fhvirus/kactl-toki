@@ -13,7 +13,7 @@ points A, B and C and ccCenter returns the center of the same circle.
 \vspace{-2mm}
 \includegraphics[width=\textwidth]{content/geometry/Circumcircle}
 \end{minipage}
- * Status: tested
+ * Status: tested w/ MinimumEnclosingCircle
  */
 #pragma once
 
