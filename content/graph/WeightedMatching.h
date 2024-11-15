@@ -1,47 +1,45 @@
 /**
- * Author: Benjamin Qi, chilli
- * Date: 2020-04-04
- * License: CC0
- * Source: https://github.com/bqi343/USACO/blob/master/Implementations/content/graphs%20(12)/Matching/Hungarian.h
- * Description: Given a weighted bipartite graph, matches every node on
- * the left with a node on the right such that no
- * nodes are in two matchings and the sum of the edge weights is minimal. Takes
- * cost[N][M], where cost[i][j] = cost for L[i] to be matched with R[j] and
- * returns (min cost, match), where L[i] is matched with
- * R[match[i]]. Negate costs for max cost. Requires $N \le M$.
- * Time: O(N^2M)
- * Status: Tested on kattis:cordonbleu, stress-tested
+ * Author: FHVirus
+ * Date: 2024-11-15
+ * Source: ckiseki
+ * Description: Given weight matrix, find maximum perfect matching.
+ * Time: $O(N^3)$
+ * Status: tested @ uoj:80
  */
 #pragma once
 
-pair<int, vi> hungarian(const vector<vi> &a) {
-	if (a.empty()) return {0, {}};
-	int n = sz(a) + 1, m = sz(a[0]) + 1;
-	vi u(n), v(m), p(m), ans(n - 1);
-	rep(i,1,n) {
-		p[0] = i;
-		int j0 = 0; // add "dummy" worker 0
-		vi dist(m, INT_MAX), pre(m, -1);
-		vector<bool> done(m + 1);
-		do { // dijkstra
-			done[j0] = true;
-			int i0 = p[j0], j1, delta = INT_MAX;
-			rep(j,1,m) if (!done[j]) {
-				auto cur = a[i0 - 1][j - 1] - u[i0] - v[j];
-				if (cur < dist[j]) dist[j] = cur, pre[j] = j0;
-				if (dist[j] < delta) delta = dist[j], j1 = j;
-			}
-			rep(j,0,m) {
-				if (done[j]) u[p[j]] += delta, v[j] -= delta;
-				else dist[j] -= delta;
-			}
-			j0 = j1;
-		} while (p[j0]);
-		while (j0) { // update alternating path
-			int j1 = pre[j0];
-			p[j0] = p[j1], j0 = j1;
-		}
-	}
-	rep(j,1,m) if (p[j]) ans[p[j] - 1] = j - 1;
-	return {-v[0], ans}; // min cost
-}
+const ll INF = numeric_limits<ll>::max() / 4;
+struct KM {
+  int n, l, r; ll ans; // fl and fr are the match
+  vector<ll> hl, hr; vector<int> fl, fr, pre, q;
+  void bfs(const vector<vector<ll>> &w, int s) {
+    vector<int> vl(n), vr(n); vector<ll> slk(n, INF);
+    l = r = 0; vr[q[r++] = s] = true;
+    auto check = [&](int x) -> bool {
+      if (vl[x] || slk[x] > 0) return true;
+      vl[x] = true; slk[x] = INF;
+      if (fl[x] != -1) return (vr[q[r++] = fl[x]] = true);
+      while (x != -1) swap(x, fr[fl[x] = pre[x]]);
+      return false;
+    };
+    while (true) {
+      while (l < r)
+        for (int x = 0, y = q[l++]; x < n; ++x) if (!vl[x])
+          if (slk[x] > hl[x] + hr[y] - w[x][y]) {
+            slk[x] = hl[x] + hr[y] - w[x][y];
+            if (pre[x] = y, !check(x)) return;
+          }
+      ll d = *min_element(all(slk));
+      for (int x = 0; x < n; ++x)
+        vl[x] ? hl[x] += d : slk[x] -= d;
+      for (int x = 0; x < n; ++x) if (vr[x]) hr[x] -= d;
+      for (int x = 0; x < n; ++x) if (!check(x)) return;
+    }
+  }
+  KM(int n_, const vector<vector<ll>> &w) : n(n_), ans(0),
+    hl(n), hr(n), fl(n, -1), fr(fl), pre(n), q(n) {
+    for (int i = 0; i < n; ++i) hl[i]=*max_element(all(w[i]));
+    for (int i = 0; i < n; ++i) bfs(w, i);
+    for (int i = 0; i < n; ++i) ans += w[i][fl[i]];
+  }
+};

@@ -1,54 +1,62 @@
 /**
- * Author: Simon Lindholm
+ * Author: FHVirus
  * Date: 2016-12-09
- * License: CC0
- * Source: http://www.mimuw.edu.pl/~mucha/pub/mucha_sankowski_focs04.pdf
+ * Source: 8BQube
  * Description: Matching for general graphs.
- * Fails with probability $N / mod$.
- * Time: O(N^3)
- * Status: not very well tested
+ * Time: $O(N^3)$
+ * Status: tested @ yosupo, uoj:79
  */
 #pragma once
 
-#include "../numerical/MatrixInverse-mod.h"
-
-vector<pii> generalMatching(int N, vector<pii>& ed) {
-	vector<vector<ll>> mat(N, vector<ll>(N)), A;
-	for (pii pa : ed) {
-		int a = pa.first, b = pa.second, r = rand() % mod;
-		mat[a][b] = r, mat[b][a] = (mod - r) % mod;
-	}
-
-	int r = matInv(A = mat), M = 2*N - r, fi, fj;
-	assert(r % 2 == 0);
-
-	if (M != N) do {
-		mat.resize(M, vector<ll>(M));
-		rep(i,0,N) {
-			mat[i].resize(M);
-			rep(j,N,M) {
-				int r = rand() % mod;
-				mat[i][j] = r, mat[j][i] = (mod - r) % mod;
-			}
-		}
-	} while (matInv(A = mat) != M);
-
-	vi has(M, 1); vector<pii> ret;
-	rep(it,0,M/2) {
-		rep(i,0,M) if (has[i])
-			rep(j,i+1,M) if (A[i][j] && mat[i][j]) {
-				fi = i; fj = j; goto done;
-		} assert(0); done:
-		if (fj < N) ret.emplace_back(fi, fj);
-		has[fi] = has[fj] = 0;
-		rep(sw,0,2) {
-			ll a = modpow(A[fi][fj], mod-2, mod);
-			rep(i,0,M) if (has[i] && A[i][fj]) {
-				ll b = A[i][fj] * a % mod;
-				rep(j,0,M) A[i][j] = (A[i][j] - A[fi][j] * b) % mod;
-			}
-			swap(fi,fj);
-		}
-	}
-	return ret;
-}
+struct Matching {
+  queue<int> q; int n;
+  vector<int> fa, s, vis, pre, match;
+  vector<vector<int>> G;
+  Matching(int _n) : n(_n), fa(n + 1), s(n + 1), vis(n + 1),
+    pre(n + 1, n), match(n + 1, n), G(n) {}
+  void add_edge(int u, int v)
+  { G[u].push_back(v), G[v].push_back(u); }
+  int Find(int u)
+  { return u == fa[u] ? u : fa[u] = Find(fa[u]); }
+  int LCA(int x, int y) {
+    static int tk = 0; tk++; x = Find(x); y = Find(y);
+    for (;; swap(x, y)) if (x != n) {
+      if (vis[x] == tk) return x;
+      vis[x] = tk;
+      x = Find(pre[match[x]]);
+    }
+  }
+  void Blossom(int x, int y, int l) {
+    for (; Find(x) != l; x = pre[y]) {
+      pre[x] = y, y = match[x];
+      if (s[y] == 1) q.push(y), s[y] = 0;
+      for (int z: {x, y}) if (fa[z] == z) fa[z] = l;
+    }
+  }
+  bool Bfs(int r) {
+    iota(all(fa), 0); fill(all(s), -1);
+    q = queue<int>(); q.push(r); s[r] = 0;
+    for (; !q.empty(); q.pop()) {
+      for (int x = q.front(); int u : G[x])
+        if (s[u] == -1) {
+          if (pre[u] = x, s[u] = 1, match[u] == n) {
+            for (int a = u, b = x, last;
+                b != n; a = last, b = pre[a])
+              last = match[b], match[b] = a, match[a] = b;
+            return true;
+          }
+          q.push(match[u]); s[match[u]] = 0;
+        } else if (!s[u] && Find(u) != Find(x)) {
+          int l = LCA(u, x);
+          Blossom(x, u, l); Blossom(u, x, l);
+        }
+    }
+    return false;
+  }
+  int solve() {
+    int ans = 0;
+    for (int x = 0; x < n; ++x)
+      if (match[x] == n) ans += Bfs(x);
+    return ans;
+  }
+};

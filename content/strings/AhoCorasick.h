@@ -1,89 +1,46 @@
 /**
- * Author: hhhhaura
- * Date: 2022-10-03
- * Source: OI-wiki
- * Description: Aho-Corasick automaton, used for multiple pattern matching.
- * Initialize with AhoCorasick ac(patterns); the automaton start node will be at index 0.
- * find(word) returns for each position the index of the longest word that ends there, or -1 if none.
- * findAll($-$, word) finds all words (up to $N \sqrt N$ many if no duplicate patterns)
- * that start at each position (shortest first).
- * Duplicate patterns are allowed; empty patterns are not.
+ * Author: FHVirus
+ * Date: 2024-11-15
+ * Source: Original kactl
+ * Description: Aho-Corasick automaton.
+ * To find all words, build a linked tree of patterns.
  * To find the longest words that start at each position, reverse all input.
- * For large alphabets, split each symbol into chunks, with sentinel bits for symbol boundaries.
- * Time: construction takes $O(26N)$, where $N =$ sum of length of patterns.
- * find(x) is $O(N)$, where N = length of x. findAll is $O(NM)$.
- * Status: Not tested
+ * Be careful of the extra node.
+ * Time: $O(\sigma N)$ construction, where $N =$ sum of length of patterns.
+ * Status: Tested @ tioj:1306
  */
 #pragma once
+
 struct AhoCorasick {
-	enum { P = 26, st = 'a'};
-	struct node { // zero-based
-		array<int, P> ch = {0};
-		int fail = 0, cnt = 0, dep = 0;
+	enum { sigma = 26, first = 'a' }; // change this!
+	struct Node {
+		int fl, next[sigma];
+		Node(int v) { memset(next, v, sizeof(next)); }
 	};
-	int cnt;
-	vector<node> v;
-	vector<int> ans;
-	void init_(int mx) {
-		v.clear();
-		cnt = 1, v.resize(mx);
-		v[0].fail = 0;
-	}
-	void insert(string s) {
-		int p = 0, dep = 1;
-		for(auto i : s) {
-			int c = i - st;
-			if(!v[p].ch[c]) {
-				v[cnt].dep = dep;
-				v[p].ch[c] = cnt ++;
-			}
-			p = v[p].ch[c], dep ++;
+	vector<Node> nd;
+	vi ord;
+	AhoCorasick() : nd(1, -1) {}
+	int insert(const string& s) {
+		assert(!s.empty());
+		int u = 0;
+		for (char c : s) {
+			int &v = nd[u].next[c - first];
+			if (v == -1) { u = v = sz(nd); nd.emplace_back(-1); }
+			else u = v;
 		}
-		v[p].cnt ++;
+    return u;
 	}
-	void build(vector<string> s) {
-		for(auto i : s) insert(i);
-		queue<int> q;
-		for(int i = 0; i < P; i ++) {
-			if(v[0].ch[i]) q.push(v[0].ch[i]);
-		}
-		while(q.size()) {
-			int p = q.front();
-			q.pop();
-			for(int i = 0; i < P; i ++) if(v[p].ch[i]) {
-				int to = v[p].ch[i], cur = v[p].fail;
-				while(cur && !v[cur].ch[i]) cur = v[cur].fail;
-				if(v[cur].ch[i]) cur = v[cur].ch[i];
-				v[to].fail = cur;
-				v[to].cnt += v[cur].cnt;
-				q.push(to);
+  void build() {
+		nd[0].fl = sz(nd);
+		nd.emplace_back(0);
+    ord.push_back(0);
+    rep (i, 0, sz(ord)) {
+			int u = ord[i], pre = nd[u].fl;
+			rep (c, 0, sigma) {
+				int &v = nd[u].next[c], y = nd[pre].next[c];
+				if (v == -1) v = y;
+				else nd[v].fl = y, ord.push_back(v);
 			}
 		}
-	}
-	void traverse(string s) {
-		int p = 0;
-		ans.assign(cnt, 0);
-		for(auto i : s) {
-			int c = i - st;
-			while(p && !v[p].ch[c]) p = v[p].fail;
-			if(v[p].ch[c]) {
-				p = v[p].ch[c];
-				ans[p] ++, v[p].cnt;
-			}
-		}
-		vector<int> ord(cnt, 0);
-		iota(all(ord), 0);
-		sort(all(ord), [&](int a, int b) { return v[a].dep > v[b].dep; });
-		for(auto i : ord) ans[v[i].fail] += ans[i];
-		return;
-	}
-	int go(string s) {
-		int p = 0;
-		for(auto i : s) {
-			int c = i - st;
-			assert(v[p].ch[c]);
-			p = v[p].ch[c];
-		}
-		return ans[p];
 	}
 };

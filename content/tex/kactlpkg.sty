@@ -43,9 +43,14 @@
 }
 
 \newcommand{\enablecolors}{
-	\lstset{basicstyle=\footnotesize\ttfamily\color{mygreen}}
+  \definecolor{mygreen}{rgb}{0,0.6,0}
+  \definecolor{mygray}{rgb}{0.5,0.5,0.5}
+  \definecolor{mymauve}{rgb}{0.58,0,0.82}
+	\lstset{basicstyle=\footnotesize\ttfamily}
 	\lstset{commentstyle=\color{darkgray}\normalfont\itshape}
 	\lstset{keywordstyle=\color{myblue}}
+	\lstset{stringstyle=\color{mymauve}}
+	\lstset{numberstyle=\color{mygreen}}
 	\lstset{identifierstyle=\color{black}}
 }
 

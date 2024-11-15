@@ -1,19 +1,27 @@
 /**
- * Author: hhhhaura
+ * Author: FHVirus
+ * Date: 2024-11-15
+ * Description: z[i] = max j s.t. s[0, j) = s[i, i+j), z[0] = 0
+ * Time: $O(|P| + |T|)$
+ * Status: Tested @ tioj:1306
  * License: CC0
- * Description: z[x] computes the length of the longest common prefix of s[i:] and s, except z[0] = 0. (abacaba -> 0010301)
- * Time: O(N)
- * Status: stress-tested
  */
 #pragma once
 
-vi Zfunc(const string &s) {
-	int n = sz(s), l = 1, r = 0;
-	vi z(n, n);
-	rep(i, 1, n) {
-		z[i] = max(0, min(z[i - l], r - i + 1));
-		while(i + z[i] < n && s[i + z[i]] == s[z[i]])
-			l = i, r = i + z[i], z[i]++;
-	}
-	return z;
+vi z_func(const string &s) { // begin-hash
+  vi z(sz(s));
+  int l = 0, r = 0;
+  rep (i, 1, sz(s)) {
+    if (i < r) z[i] = min(r - i, z[i - l]);
+    while (i + z[i] < sz(s) and s[z[i]] == s[i + z[i]]) ++z[i];
+    if (i + z[i] > r) l = i, r = i + z[i];
+  }
+  return z;
+} // end-hash
+int match(const string &T, const string &P) {
+  auto z = z_func(P + '$' + T);
+  int ans = 0;
+  rep (i, 0, sz(T))
+    ans += (z[sz(P) + 1 + i] == sz(P));
+  return ans;
 }

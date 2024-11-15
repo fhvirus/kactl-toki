@@ -13,7 +13,7 @@ struct Dinic {
 	struct E {
 		int v, r;
 		ll c, oc;
-		ll flow() { return max(oc - c, 0ll); } // if you need flows
+		// ll flow() { return max(oc - c, 0ll); }
 	};
 	int n;
 	vi le, it, q;
@@ -28,26 +28,25 @@ struct Dinic {
 		for (int &i = it[u]; i < sz(adj[u]); ++i) {
 			auto &[v, r, c, oc] = adj[u][i];
 			if (le[v] == le[u] + 1)
-				if (ll p = dfs(v, t, min(f, c))) {
-					c -= p, adj[v][r].c += p;
-					return p;
-				}
+				if (ll p = dfs(v, t, min(f, c)))
+					return c -= p, adj[v][r].c += p, p;
 		}
 		return 0;
 	}
 	ll flow(int s, int t) {
 		ll res = 0; q[0] = s;
-		rep(L,0,31) do { // 'rep(L,30,31)' maybe faster for random data
+		rep(L,0,31) do { // rep(L,30,31) maybe faster for random
 			le = it = vi(sz(q));
 			int qi = 0, qe = le[s] = 1;
 			while (qi < qe && !le[t]) {
 				int u = q[qi++];
-				for (auto [v, r, c, oc]: adj[u]) if (!le[v] && c >> (30 - L))
+				for (auto [v, r, c, oc]: adj[u])
+          if (!le[v] && c >> (30 - L))
 						q[qe++] = v, le[v] = le[u] + 1;
 			}
 			while (ll p = dfs(s, t, LLONG_MAX)) res += p;
 		} while (le[t]);
 		return res;
 	}
-	bool inSCut(int u) { return le[u] != 0; }
+	// bool inSCut(int u) { return le[u] != 0; }
 };

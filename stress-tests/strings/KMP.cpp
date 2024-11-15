@@ -14,7 +14,7 @@ void gen(string& s, int at, int alpha, F f) {
 }
 
 void test(const string& s) {
-
+  // TODO
 }
 
 int main() {
